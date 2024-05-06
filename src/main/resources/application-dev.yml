@@ -1,0 +1,37 @@
+spring:
+  #Configuration de la base de données
+  datasource:
+    #lien de la base de données
+    url: jdbc:mysql://localhost:5432/book_social
+    username: username023
+    password: password023
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      #creation des tables dans la base de donnéese  modifie les tables
+      ddl-auto: update
+      #affiche les requetes sql dans la console
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    #Configuration du serveur de mail
+  mail:
+      host: localhost
+      port: 1025
+      username: Bears
+      password: Bears
+      protocol: smtp
+      properties:
+        mail:
+          smtp:
+            trust: "*"
+          auth: true
+          starttls:
+                enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+

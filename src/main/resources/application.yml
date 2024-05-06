@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    active: dev
+  #pour telecharger les fichiers
+  servlet:
+    multipart:
+      max-file-size: 50MB
+
+springdoc:
+  default-produces-media-type: application/json
+server:
+  servlet:
+    context-path: /api/
