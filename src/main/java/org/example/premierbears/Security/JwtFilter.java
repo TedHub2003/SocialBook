@@ -35,7 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        if (request.getServletPath().contains("/api/auth")) {
+        if (request.getServletPath().startsWith("/auth")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -43,31 +43,28 @@ public class JwtFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-          filterChain.doFilter(request, response);
-          return;
-        }
-        //cette ligne permet de recuperer le token dans le header et 7 est la taille de Bearer
-        // On compte à partir de 0 ont fini à 6 donc 7 caractere en tout pour Bearer et l'espace au nivau
-        //de la condition if
-        assert authHeader != null;
-        jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
-        if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-            if(jwtService.isTokenValid(jwt,userDetails)){
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            jwt = authHeader.substring(7);
+            userEmail = jwtService.extractUsername(jwt);
+            if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+                if(jwtService.isTokenValid(jwt,userDetails)){
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
-
+            filterChain.doFilter(request, response);
+        } else {
+            // Gérer le cas où l'en-tête d'authentification est null ou mal formaté
+            // Vous pouvez choisir de renvoyer une réponse avec un code d'état HTTP 401 (Non autorisé)
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return;
         }
-        filterChain.doFilter(request, response);
-
     }
 }

@@ -4,8 +4,8 @@ services:
     image: postgres
     environment:
         # creer un utilisateur username023 avec le mot de passe password023
-        POSTGRES_USER: username023
-        POSTGRES_PASSWORD: password023
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: teddybd
         # creer un volume pour stocker les donnees de la base de donnee
         PGDATA: /var/lib/postgresql/data
         # creer une base de donnee book_social

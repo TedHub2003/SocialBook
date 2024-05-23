@@ -10,4 +10,4 @@ springdoc:
   default-produces-media-type: application/json
 server:
   servlet:
-    context-path: /api/
+    context-path: /api

@@ -2,9 +2,9 @@ spring:
   #Configuration de la base de données
   datasource:
     #lien de la base de données
-    url: jdbc:mysql://localhost:5432/book_social
-    username: username023
-    password: password023
+    url: jdbc:postgresql://localhost:5432/book_social
+    username: postgres
+    password: teddybd
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -44,3 +44,5 @@ spring:
         frontend:
           activation-url:  http://localhost:4200/activate-account
 
+  server:
+    port: 8080

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +40,7 @@ public class AuthenticationService {
                 .orElseThrow(() -> new IllegalStateException("ROLE USER was  not found"));
 
         var user = User.builder()
+                .id(generateId())
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
                 .email(request.getEmail())
@@ -51,7 +53,11 @@ public class AuthenticationService {
         sendValidationEmail(user);
 
     }
-
+    private int generateId() {
+        // Utiliser UUID pour générer un ID unique et le convertir en entier
+        UUID uuid = UUID.randomUUID();
+        return Math.abs(uuid.hashCode());
+    }
     // cette methode permet d'envoyer un email de validation
     private void sendValidationEmail(User user) throws MessagingException {
         var newToken = generateAndSaveActivationToken(user);
