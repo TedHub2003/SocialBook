@@ -1,7 +1,9 @@
 package org.example.premierbears.auth;
 
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.premierbears.Security.JwtService;
 import org.example.premierbears.email.EmailService;
 import org.example.premierbears.email.EmailTemplateName;
 import org.example.premierbears.role.RoleRepository;
@@ -10,11 +12,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.example.premierbears.user.TokenRepository;
 import org.example.premierbears.user.User;
 import org.example.premierbears.user.UserRepository;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +33,8 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
-
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
     @Value("${spring.application.mailing.frontend.activation-url}")
     private String activitionUrl;
 
@@ -101,5 +108,40 @@ public class AuthenticationService {
             codeBuilder.append(characters.charAt(randomIndex));
         }
         return codeBuilder.toString();
+    }
+
+
+    // cette methode permet d'authentifier un utilisateur
+    // elle prend en parametre une requete d'authentification
+    // et retourne une reponse d'authentification
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        var auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword())
+        );
+        var claims= new HashMap<String,Object>();
+        var user=((User) auth.getPrincipal());
+        claims.put("fullName", user.fullName());
+        var jwtToken= jwtService.generateToken(claims,user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+
+    //@Transactional
+    public void activateAccount(String token) throws MessagingException {
+        var savedToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Token not found"));
+        if (LocalDateTime.now().isAfter(savedToken.getExpiratedAt())) {
+            sendValidationEmail(savedToken.getUser());
+            throw new IllegalStateException("Token expired! A new one has been sent to your email");
+        }
+        var user = userRepository.findById(savedToken.getUser().getId())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setEnabled(true);
+        userRepository.save(user);
+        savedToken.setValidatedAt(LocalDateTime.now());
+        tokenRepository.save(savedToken);
     }
 }
