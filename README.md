@@ -20,7 +20,8 @@ Cette API permet aux utilisateurs de s'inscrire, de laisser des avis et de recev
 
 ## 🛠 Technologies utilisées  
 - **Langage** : Java 17  
-- **Framework** : Spring Boot (Spring MVC, Spring Security, Spring Data JPA, Spring Mail)  
+- **Framework** : Spring Boot (Spring MVC, Spring Security, Spring Data JPA, Spring Mail)
+- **Front-End** : Angular (encours)
 - **Base de données** : PostgreSQL  
 - **Outils** : IntelliJ IDEA, Postman, Git  
 
